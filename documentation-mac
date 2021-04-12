@@ -1,0 +1,139 @@
+Step 1 :
+
+Install HomeBrew
+
+Run : /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Step 2 :
+
+Confirm you have the correct version of java (version 8) on your machine. If it returns anything other than 1.8., be sure to install the correct version.
+
+$ java -version
+
+$ brew cask install homebrew/cask-versions/adoptopenjdk8
+
+[For windows, open cmd and try]
+
+Step 3 : 
+
+Install Hadoop - using homebrew for mac/linux and from homepage for Windows - https://hadoop.apache.org/releases.html
+
+$ brew install hadoop
+
+Step 4 :
+
+Configure Hadoop 
+
+Configuring Hadoop will take place over a few steps. 
+[A more detailed version can be found in the Apache Hadoop documentation for setting up a single node cluster.] 
+
+  Step 4.1 :
+  
+    Format NameNode
+    
+    Open the document containing the environment variable settings :
+    
+      $ cd /usr/local/cellar/hadoop/3.2.1/libexec/etc/hadoop
+    
+      $ open hadoop-env.sh
+      
+      [Open a new terminal and do $ /usr/libexec/java_home to find the location]
+      
+      Make the following changes to the document, save and close.
+
+      Add the location for export JAVA_HOME
+
+      export JAVA_HOME= “/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home”
+ 
+  Step 4.2 :
+  
+  Make changes to core-site.xml,
+                  hdfs-site.xml,
+                  mapred-site.xml,
+                  yarn-site.xml.
+
+
+  Replace information for export HADOOP_OPTS
+  change export HADOOP_OPTS=”-Djava.net.preferIPv4Stack=true”
+  to export HADOOP_OPTS = ”-Djava.net.preferIPv4Stack=true -Djava.security.krb5.realm= -Djava.security.krb5.kdc=”
+
+  Make changes to core files
+
+  $ open core-site.xml
+  <configuration>
+    <property>
+      <name>fs.defaultFS</name>
+      <value>hdfs://localhost:9000</value>
+    </property>
+  </configuration>
+
+  Make changes to hdfs files
+
+  $ open hdfs-site.xml
+  <configuration>
+    <property>
+      <name>dfs.replication</name>
+      <value>1</value>
+    </property>
+  </configuration>
+
+  Make changes to mapred files
+
+  $ open mapred-site.xml
+
+  <configuration>
+    <property>
+      <name>mapreduce.framework.name</name>
+      <value>yarn</value>
+    </property>
+    <property>
+      <name>mapreduce.application.classpath</name>   <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
+    </property>
+  </configuration>
+
+  Make changes to yarn files
+
+  $ open yarn-site.xml
+
+  <configuration>
+  <property>
+  <name>yarn.nodemanager.aux-services</name>
+  <value>mapreduce_shuffle</value>
+  </property>
+  <property>
+  <name>yarn.nodemanager.env-whitelist</name>
+  <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
+  </property>
+  </configuration>
+
+Step 5 :
+
+Format NameNode
+
+$ cd /usr/local/cellar/hadoop/3.2.1/libexec/bin
+
+$ hdfs namenode -format
+
+A warning will tell you that a directory for logs is being created. You will be prompted to re-format filesystem in Storage Directory root. Say Y and press RETURN.
+
+NOW RUN HADOOP :
+
+Run Hadoop
+
+$ cd /usr/local/cellar/hadoop/3.2.1/libexec/sbin
+
+$ ./start-all.sh
+
+$ jps
+
+Example output : 
+
+  66896 ResourceManager
+  66692 SecondaryNameNode
+  66535 DataNode
+  67350 Jps
+  66422 NameNode67005 NodeManager
+  
+Open a web browser to see your configurations for the current session.
+
+http://localhost:9870
